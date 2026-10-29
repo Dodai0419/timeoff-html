@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time off</title>
+<style>
+:root{--app:#f8f8f8;--surface:#fff;--selected:#eaeae6;--hover:#f1f1ee;--line:#e5e7e1;--control:#ededed;--fg:#1d1d1d;--fg2:#757575;--ph:#a1a1a1;--section:#b8b8b8;--dayname:#c2c2c2;--brand:#8965de;--brand2:#7a55d4;
+--green-bg:#bde7db;--green-fg:#005c42;--purple-bg:#e3daf7;--purple-fg:#594290;--cyan-bg:#aee9f4;--cyan-fg:#28555d;--orange-bg:#fdd8b8;--orange-fg:#774317;--pink-bg:#fdd4e6;--pink-fg:#813455;--blue-bg:#c5e2f9;--blue-fg:#0e5289;
+--t-green:rgba(0,164,117,.12);--t-orange:rgba(248,140,47,.12);--t-blue:rgba(23,139,232,.12);--t-cyan:rgba(100,213,233,.16);--t-pink:rgba(248,100,164,.12);--t-purple:rgba(137,101,222,.12);color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--app:#121212;--surface:#181818;--selected:#262624;--hover:#232321;--line:#2a2a28;--control:#313131;--fg:#ededed;--fg2:#9a9a9a;--ph:#6b6b6b;--section:#5c5c5c;--dayname:#6b6b6b;
+--green-bg:#123d31;--green-fg:#8fe0c6;--purple-bg:#2d2547;--purple-fg:#c9b8f5;--cyan-bg:#11393f;--cyan-fg:#93e3f1;--orange-bg:#43301f;--orange-fg:#f9c497;--pink-bg:#43222f;--pink-fg:#f5b3cf;--blue-bg:#13314a;--blue-fg:#9ccdf5;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;height:100vh;display:grid;grid-template-columns:240px 1fr;font:14px/1.3 Inter,"Segoe UI",system-ui,sans-serif;color:var(--fg);background:var(--app);overflow:hidden}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
+.side{border-right:1px solid var(--line);padding:0 12px;display:flex;flex-direction:column}
+.ws{height:53px;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:16px}
+.side h6{margin:22px 8px 8px;font:12px ui-monospace,Consolas,monospace;color:var(--section);font-weight:400}
+.nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--fg)}.nav i{width:14px;height:14px;border-radius:3px;background:var(--ph)}
+.nav.on{background:var(--selected)}.nav.on i{background:var(--brand)}
+.side .reset{margin-top:auto;margin-bottom:16px;border:0;background:none;color:var(--fg2);text-align:left;padding:8px 10px}
+.main{display:grid;grid-template-rows:53px 1fr;min-width:0}
+.top{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line)}.top h1{font-size:16px;font-weight:500;margin:0;flex:1}
+.search{width:240px;height:30px;border:1px solid var(--control);border-radius:8px;background:var(--surface);padding:0 10px}
+.icon{width:30px;height:30px;border:1px solid var(--control);border-radius:8px;background:var(--surface);color:var(--fg2)}
+.primary{height:30px;border:0;border-radius:8px;background:var(--brand);color:#fff;padding:0 12px;box-shadow:0 0 0 2px rgba(137,101,222,.3)}.primary:hover{background:var(--brand2)}
+.body{display:grid;grid-template-columns:1fr 304px;min-height:0}
+.cal{display:grid;grid-template-rows:68px auto auto 1fr;background:var(--surface);min-width:0;min-height:0}
+.chead{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line)}.chead .t{flex:1}.chead b{font-weight:500;font-size:16px;display:block}.chead small{color:var(--fg2);font-size:14px}
+.btn{height:30px;border:1px solid var(--control);border-radius:8px;background:var(--surface);padding:0 10px}
+.seg{display:flex;background:var(--app);border-radius:8px;padding:2px}.seg button{border:0;background:none;padding:4px 10px;border-radius:6px;color:var(--fg2)}.seg button.on{background:var(--surface);color:var(--fg);box-shadow:0 0 0 1px var(--control)}
+.days,.allday{display:grid;border-bottom:1px solid var(--line)}
+.days div{height:56px;display:flex;align-items:center;gap:10px;padding:0 12px;border-left:1px solid var(--line);font-size:16px}.days span{color:var(--dayname);font-size:14px}
+.days em{font-style:normal;padding:2px 6px;border-radius:6px}.days .sel em{background:var(--brand);color:#fff}
+.allday>div{min-height:40px;border-left:1px solid var(--line);padding:5px 3px;display:flex;flex-direction:column;gap:3px}
+.chip{border-radius:6px;padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.scroll{overflow:auto;min-height:0}.grid{display:grid;position:relative}
+.hours div{height:64px;position:relative}.hours span{position:absolute;top:-9px;right:12px;color:var(--fg2);font-size:14px}
+.col{position:relative;border-left:1px solid var(--line);background:repeating-linear-gradient(var(--surface) 0 63px,var(--line) 63px 64px)}
+.ev{position:absolute;border-radius:6px;padding:4px 8px;overflow:hidden;cursor:grab;font-size:14px;line-height:1.05;border:1px solid var(--surface);user-select:none}
+.ev small{display:block;font-size:12px;margin-top:2px}.ev .tt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.ev.short .tt{display:block;-webkit-line-clamp:1;white-space:nowrap;text-overflow:ellipsis}.ev.short{white-space:nowrap;text-overflow:ellipsis;padding-top:6px}.ev .rz{position:absolute;left:0;right:0;bottom:0;height:6px;cursor:ns-resize}
+.now{position:absolute;left:0;right:0;height:2px;background:var(--brand);z-index:2}
+.ghost{position:absolute;left:3px;right:3px;background:var(--brand);opacity:.25;border-radius:6px}
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:minmax(96px,1fr)}.month>div{border-left:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden}.month .out{color:var(--ph)}
+.stats{border-left:1px solid var(--line);background:var(--app);overflow:auto}.stats header{height:68px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--line);font-size:16px}.stats header b{flex:1;font-weight:500}
+.stat{display:flex;gap:12px;align-items:center;padding:16px;border:0;background:none;width:100%;text-align:left}.stat:hover{background:var(--hover)}
+.stat i{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-style:normal;font-size:16px}.stat b{display:block;font-weight:400;font-size:16px;margin-bottom:8px;color:var(--fg)}.stat span{color:var(--fg2)}.stat a{color:var(--brand)}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);padding:20px;width:380px}dialog::backdrop{background:rgba(0,0,0,.25)}
+dialog h2{margin:0 0 14px;font-size:16px;font-weight:500}dialog label{display:block;margin:10px 0 4px;color:var(--fg2)}dialog input,dialog select{width:100%;height:32px;border:1px solid var(--control);border-radius:8px;background:var(--surface);padding:0 8px}
+dialog .row{display:flex;gap:8px}dialog .row>*{flex:1}.sum{margin:14px 0;padding:10px;border-radius:8px;background:var(--t-purple)}.acts{display:flex;justify-content:flex-end;gap:8px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--surface);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s}#toast.on{opacity:1}
+@media (max-width:900px){body{grid-template-columns:1fr}.side,.stats,.search{display:none}.body{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="side">
+  <div class="ws">Workspace <button class="icon" aria-label="Switch workspace">⇅</button></div>
+  <h6>Main menu</h6><div class="nav"><i></i>Dashboard</div><div class="nav"><i></i>Analytics</div>
+  <h6>Personal</h6><div class="nav"><i></i>Personal details</div><div class="nav"><i></i>Documents</div><div class="nav on"><i></i>Time off</div><div class="nav"><i></i>Time tracking</div><div class="nav"><i></i>Benefits</div>
+  <h6>Payments</h6><div class="nav"><i></i>Invoice</div><div class="nav"><i></i>Withdrawal methods</div>
+  <button class="reset" id="reset">↺ Reset demo data</button>
+</nav>
+<div class="main">
+  <header class="top"><h1>Time off</h1><input class="search" id="q" placeholder="Search…"><button class="icon" aria-label="Help">?</button><button class="icon" aria-label="Notifications">🔔</button><button class="primary" id="req">Request time-off</button></header>
+  <div class="body">
+    <section class="cal" id="cal"></section>
+    <aside class="stats"><header><b>Time off stats</b><button class="btn" id="learn">Learn more</button></header><div id="stats"></div></aside>
+  </div>
+</div>
+<dialog id="dlg"></dialog><div id="toast"></div>
+<script src="timeoff.js"></script>
+<script>
+const T = window.Timeoff, KEY = "timeoff-html:v1", H = T.HOUR_HEIGHT;
+let S = load(), view = "week", cursor = T.DESIGN_DATE, query = "";
+const today = T.toKey(new Date()), $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.version === 1) return s; } catch {} return T.createSeed(); }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} }
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t.h); t.h = setTimeout(() => t.classList.remove("on"), 1800); }
+const color = (c) => `background:var(--${c}-bg);color:var(--${c}-fg)`;
+const visible = (e) => !query || e.title.toLowerCase().includes(query);
+const dayStart = () => S.settings.dayStartHour * 60;
+
+function render() { renderCal(); renderStats(); save(); }
+
+function renderCal() {
+  const days = view === "day" ? [cursor] : T.weekDays(cursor, S.settings.weekStartsOn);
+  const d0 = T.fromKey(cursor), title = `${T.MONTHS[d0.getMonth()]}, ${d0.getFullYear()}`;
+  const sub = view === "month" ? `${S.events.filter((e) => e.date.slice(0, 7) === cursor.slice(0, 7)).length} events`
+    : `Week ${T.isoWeek(T.addDays(days[0], 1))} · ${view === "day" ? T.formatShort(cursor) : T.formatRange(days[0], days[6])}`;
+  const head = `<div class="chead"><div class="t"><b>${title}</b><small>${sub}</small></div>
+    <button class="btn" data-nav="0">Today</button><button class="btn" data-nav="-1" aria-label="Previous">←</button><button class="btn" data-nav="1" aria-label="Next">→</button>
+    <div class="seg">${["day", "week", "month"].map((v) => `<button data-view="${v}" class="${v === view ? "on" : ""}">${v[0].toUpperCase() + v.slice(1)}</button>`).join("")}</div></div>`;
+  if (view === "month") { $("#cal").innerHTML = head + `<div></div><div></div><div class="scroll">${monthHtml()}</div>`; return; }
+  const cols = `grid-template-columns:72px repeat(${days.length},minmax(0,1fr))`;
+  const dayHead = `<div class="days" style="${cols}"><div style="border:0"></div>${days.map((d) => `<div class="${d === cursor ? "sel" : ""}"><span>${T.WEEKDAYS_SHORT[T.fromKey(d).getDay()]}</span><em>${T.fromKey(d).getDate()}</em></div>`).join("")}</div>`;
+  const allday = `<div class="allday" style="${cols}"><div style="border:0"></div>${days.map((d) => `<div>${
+    S.holidays.filter((h) => h.date === d).map((h) => `<div class="chip" style="${color("purple")}" data-hol title="${esc(h.name)}">National holiday · ${esc(h.name)}</div>`).join("") +
+    S.events.filter((e) => e.date === d && e.allDay && visible(e)).map((e) => `<div class="chip" style="${color(e.color)}" data-id="${e.id}">${esc(e.title)}</div>`).join("")}</div>`).join("")}</div>`;
+  const hours = []; for (let h = S.settings.dayStartHour; h < 24; h++) hours.push(`<div>${h > S.settings.dayStartHour ? `<span>${T.formatTime(h * 60)}</span>` : ""}</div>`);
+  const colsHtml = days.map((d) => `<div class="col" data-date="${d}">${T.layoutDay(S.events.filter((e) => e.date === d && !e.allDay && visible(e)))
+    .map(({ event: e, column, columns }) => { const top = (Math.max(e.start, dayStart()) - dayStart()) / 60 * H, h = Math.max(18, (e.end - Math.max(e.start, dayStart())) / 60 * H - 2);
+      return `<div class="ev${h < 36 ? " short" : ""}" data-id="${e.id}" style="${color(e.color)};top:${top}px;height:${h}px;left:calc(${column * 100 / columns}% + 2px);width:calc(${100 / columns}% - 4px)"><span class="tt">${esc(e.title)}</span>${h > 36 ? `<small>${T.formatTime(e.start)} – ${T.formatTime(e.end)}</small>` : ""}${e.note && h > 56 ? `<small>${esc(e.note)}</small>` : ""}<div class="rz"></div></div>`; }).join("")
+    }${d === today ? `<div class="now" style="top:${((new Date().getHours() * 60 + new Date().getMinutes()) - dayStart()) / 60 * H}px"></div>` : ""}</div>`).join("");
+  $("#cal").innerHTML = head + dayHead + allday + `<div class="scroll" id="sc"><div class="grid" style="${cols}"><div class="hours">${hours.join("")}</div>${colsHtml}</div></div>`;
+}
+
+function monthHtml() {
+  const m = cursor.slice(0, 7);
+  return `<div class="month">${T.monthGrid(cursor, S.settings.weekStartsOn).map((d) => `<div class="${d.slice(0, 7) === m ? "" : "out"}"><span>${T.fromKey(d).getDate()}</span>${
+    S.holidays.filter((h) => h.date === d).map((h) => `<div class="chip" style="${color("purple")}" data-hol>${esc(h.name)}</div>`).join("") +
+    S.events.filter((e) => e.date === d && visible(e)).sort((a, b) => a.start - b.start).map((e) => `<div class="chip" style="${color(e.color)}" data-id="${e.id}">${e.allDay ? "" : T.formatTime(e.start) + " "}${esc(e.title)}</div>`).join("")}</div>`).join("")}</div>`;
+}
+
+function renderStats() {
+  const s = T.computeLeaveStats(S, today), days = (n) => `${T.formatDays(n)} ${n === 1 ? "day" : "days"}`;
+  const rows = [["✓", "green", `${days(s.available)} available`, "To book time off", "req"], ["◷", "orange", `${s.pendingCount} pending ${s.pendingCount === 1 ? "request" : "requests"}`, "Awaiting manager approval", "pending"],
+    ["→", "blue", `${days(s.upcoming)} upcoming`, "Total days taken", "policy"], ["▦", "cyan", `${days(s.contract)} per year`, "In the contract", "policy"],
+    ["+", "pink", `${days(s.carryover)} extra leave`, "From carryover days", "policy"], ["⚑", "purple", `${s.holidays} national ${s.holidays === 1 ? "holiday" : "holidays"}`, "<a>See holiday list</a>", "holidays"]];
+  $("#stats").innerHTML = rows.map(([ic, c, v, cap, act]) => `<button class="stat" data-act="${act}"><i style="background:var(--t-${c});color:var(--${c}-fg)">${ic}</i><div><b>${v}</b><span>${cap}</span></div></button>`).join("");
+}
+
+// Dialogs.
+function openRequest(pre = {}) {
+  const r = { type: "Time off", from: cursor, to: cursor, allDay: true, start: 540, end: 1020, notes: "", ...pre };
+  const dlg = $("#dlg");
+  dlg.innerHTML = `<form method="dialog"><h2>Request time-off</h2>
+    <label>Type</label><select name="type">${T.LEAVE_TYPES.map((t) => `<option ${t === r.type ? "selected" : ""}>${t}</option>`).join("")}</select>
+    <label><input type="checkbox" name="allDay" ${r.allDay ? "checked" : ""} style="width:auto;height:auto"> All day</label>
+    <div class="row"><div><label>From</label><input type="date" name="from" value="${r.from}"></div><div class="d"><label>To</label><input type="date" name="to" value="${r.to}"></div></div>
+    <div class="row t"><div><label>Start</label><input type="time" name="start" step="900" value="${T.formatTime(r.start)}"></div><div><label>End</label><input type="time" name="end" step="900" value="${T.formatTime(r.end)}"></div></div>
+    <label>Notes</label><input name="notes" value="${esc(r.notes)}" placeholder="Optional">
+    <div class="sum" id="sum"></div><div class="acts"><button class="btn" value="cancel">Cancel</button><button class="primary" value="ok">Submit request</button></div></form>`;
+  const f = dlg.querySelector("form"), input = () => ({ type: f.type.value, from: f.from.value, to: f.allDay.checked ? f.to.value : f.from.value, allDay: f.allDay.checked,
+    start: T.parseTime(f.start.value), end: T.parseTime(f.end.value), notes: f.notes.value });
+  const update = () => { const i = input(), m = T.measureRequest(S, i), left = T.computeLeaveStats(S, today).available - m.days;
+    dlg.querySelector(".d").style.display = i.allDay ? "" : "none"; dlg.querySelector(".t").style.display = i.allDay ? "none" : "";
+    $("#sum").innerHTML = `<b>${m.label}</b> of leave${i.allDay ? " (weekends and holidays skipped)" : ""} · <b>${T.formatDays(Math.max(0, left))} days</b> left after this request${left < 0 ? " — over your balance" : ""}`; };
+  f.addEventListener("input", update); update();
+  dlg.onclose = () => { if (dlg.returnValue !== "ok") return; const i = input(); if (i.to < i.from || (!i.allDay && i.end <= i.start)) return toast("Check the dates and times");
+    const req = T.submitRequest(S, i); cursor = req.from; render(); toast(`Request submitted · ${req.duration}`); };
+  dlg.showModal();
+}
+function openEvent(id) {
+  const e = S.events.find((x) => x.id === id), req = e.requestId && S.requests.find((r) => r.id === e.requestId), dlg = $("#dlg");
+  dlg.innerHTML = `<form method="dialog"><h2>${esc(e.title)}</h2><p>${T.formatShort(e.date)} · ${e.allDay ? "All day" : `${T.formatTime(e.start)} – ${T.formatTime(e.end)}`}</p>
+    ${req ? `<p>Leave request · ${req.status} · ${esc(req.duration)}</p>` : ""}${e.note ? `<p>${esc(e.note)}</p>` : ""}
+    <div class="acts"><button class="btn" value="del">Delete</button><button class="primary" value="ok">Close</button></div></form>`;
+  dlg.onclose = () => { if (dlg.returnValue !== "del") return; S.events = S.events.filter((x) => x.id !== id && !(req && x.requestId === req.id));
+    if (req) S.requests = S.requests.filter((r) => r.id !== req.id); render(); toast(req ? "Request deleted" : "Event deleted"); };
+  dlg.showModal();
+}
+function openNewEvent(date, start, end) {
+  const dlg = $("#dlg");
+  dlg.innerHTML = `<form method="dialog"><h2>New event · ${T.formatShort(date)} ${T.formatTime(start)} – ${T.formatTime(end)}</h2><label>Title</label><input name="title" required autofocus>
+    <div class="acts" style="margin-top:14px"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn" value="leave" formnovalidate>Request as leave</button><button class="primary" value="ok">Add event</button></div></form>`;
+  dlg.onclose = () => { const v = dlg.returnValue, t = dlg.querySelector("[name=title]").value.trim();
+    if (v === "leave") return openRequest({ type: "Personal", from: date, to: date, allDay: false, start, end });
+    if (v !== "ok" || !t) return; S.events.push({ id: "ev-" + Date.now().toString(36), title: t, date, start, end, allDay: false, color: "blue" }); render(); };
+  dlg.showModal();
+}
+function list(title, items) { const dlg = $("#dlg"); dlg.innerHTML = `<form method="dialog"><h2>${title}</h2>${items.map((i) => `<p>${i}</p>`).join("")}<div class="acts"><button class="primary">Close</button></div></form>`; dlg.onclose = null; dlg.showModal(); }
+
+// Clicks.
+document.addEventListener("click", (ev) => {
+  const t = ev.target.closest("[data-nav],[data-view],[data-id],[data-hol],[data-act]"); if (!t || drag.moved) return;
+  if (t.dataset.nav !== undefined) { const n = +t.dataset.nav; cursor = n === 0 ? today : view === "month" ? T.addMonths(cursor, n) : T.addDays(cursor, n * (view === "day" ? 1 : 7)); }
+  else if (t.dataset.view) view = t.dataset.view;
+  else if (t.dataset.id) return openEvent(t.dataset.id);
+  else if (t.dataset.hol !== undefined || t.dataset.act === "holidays") return list("National holidays", S.holidays.map((h) => `${T.formatShort(h.date)} · ${esc(h.name)}`));
+  else if (t.dataset.act === "req") return openRequest();
+  else if (t.dataset.act === "pending") return list("Pending requests", S.requests.filter((r) => r.status === "pending").map((r) => `${T.formatShort(r.from)} · ${esc(r.type)} · ${esc(r.duration)}`));
+  else if (t.dataset.act === "policy") return policy();
+  renderCal();
+});
+const policy = () => list("Leave policy", [`${S.settings.contractDays} days per year in the contract, plus ${S.settings.carryoverDays} carryover days.`, "Requests count working days only: weekends and national holidays are skipped.", "Timed requests count hours of an 8-hour day. Pending requests are held from your balance until approved."]);
+$("#req").onclick = () => openRequest();
+$("#learn").onclick = policy;
+$("#reset").onclick = () => { S = T.createSeed(); cursor = T.DESIGN_DATE; render(); toast("Demo data reset"); };
+$("#q").oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderCal(); };
+
+// Drag: empty space creates, an event moves (across days), its bottom edge resizes. 15-minute snap.
+const drag = { moved: false };
+const minutesAt = (col, y) => T.snap(dayStart() + (y - col.getBoundingClientRect().top) / H * 60);
+document.addEventListener("pointerdown", (ev) => {
+  const col = ev.target.closest(".col"); if (!col || ev.button) return;
+  const el = ev.target.closest(".ev"), e = el && S.events.find((x) => x.id === el.dataset.id), m0 = minutesAt(col, ev.clientY);
+  Object.assign(drag, { moved: false, col, e, mode: !e ? "create" : ev.target.classList.contains("rz") ? "resize" : "move", m0, orig: e && { ...e } });
+  if (!e) { drag.ghost = document.createElement("div"); drag.ghost.className = "ghost"; col.appendChild(drag.ghost); }
+});
+document.addEventListener("pointermove", (ev) => {
+  if (!drag.col) return;
+  const over = document.elementFromPoint(ev.clientX, ev.clientY)?.closest(".col") || drag.col, m = minutesAt(over, ev.clientY);
+  if (Math.abs(m - drag.m0) < 15 && !drag.moved && over === drag.col) return;
+  drag.moved = true;
+  if (drag.mode === "create") { const a = Math.min(drag.m0, m), b = Math.max(drag.m0, m) || a + 15; Object.assign(drag.ghost.style, { top: (a - dayStart()) / 60 * H + "px", height: (b - a) / 60 * H + "px" }); drag.range = [a, Math.max(b, a + 15)]; return; }
+  const o = drag.orig, len = o.end - o.start;
+  if (drag.mode === "resize") drag.e.end = Math.max(o.start + 15, Math.min(1440, o.end + m - drag.m0));
+  else { drag.e.start = Math.max(0, Math.min(1440 - len, o.start + m - drag.m0)); drag.e.end = drag.e.start + len; drag.e.date = over.dataset.date; }
+  const top = $("#sc").scrollTop; renderCal(); $("#sc").scrollTop = top;
+});
+document.addEventListener("pointerup", () => {
+  if (!drag.col) return; const { mode, moved, range, col } = drag; drag.col = null;
+  if (mode === "create") { drag.ghost.remove(); if (moved && range) openNewEvent(col.dataset.date, range[0], range[1]); }
+  else if (moved) render();
+  setTimeout(() => (drag.moved = false));
+});
+
+render();
+const sc = $("#sc"); if (sc) sc.scrollTop = 0;
+</script>
+</body>
+</html>
